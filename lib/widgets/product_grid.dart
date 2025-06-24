@@ -36,23 +36,32 @@ class ProductGrid extends StatelessWidget {
         final product = products[index];
         return Card(
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   child: CachedNetworkImage(
-                    imageUrl: product.imageUrl,
+                    // imageUrl: product.imageUrl,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                    errorWidget: (context, url, error) => const Icon(Icons.error),
+                    placeholder: (context, url) =>
+                        const Center(child: CircularProgressIndicator()),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.error),
+                    imageUrl: 'https://via.placeholder.com/150',
                   ),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.02),
+                padding: EdgeInsets.all(
+                  MediaQuery.of(context).size.width * 0.02,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -67,7 +76,7 @@ class ProductGrid extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '4${product.price.toStringAsFixed(2)}',
+                      '4${product.price.toString()}',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,

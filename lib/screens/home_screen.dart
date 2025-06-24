@@ -1,145 +1,169 @@
 import 'package:flutter/material.dart';
-import '../models/category.dart';
 import '../models/product.dart';
 import '../services/api_service.dart';
-import '../widgets/search_bar.dart' as custom_widgets;
-import '../widgets/category_carousel.dart' as custom_widgets;
-import '../widgets/product_grid.dart';
+import '../widgets/category_carousel.dart';
+import '../widgets/product_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
-
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final TextEditingController _searchController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
+  List<Product> _bestSelling = [];
+  List<Product> _moreToExplore = [];
 
-  List<Category> _categories = [];
-  int? _selectedCategoryId;
-  List<Product> _products = [];
-  int _currentPage = 1;
-  bool _isLoading = false;
-  bool _isLoadingMore = false;
-  bool _hasMore = true;
-  String _searchQuery = '';
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchCategories();
-    _fetchProducts(reset: true);
-    _scrollController.addListener(_onScroll);
+    loadData();
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 && !_isLoadingMore && _hasMore) {
-      _fetchProducts();
-    }
-  }
-
-  Future<void> _fetchCategories() async {
-    try {
-      final categories = await ApiService.fetchCategories();
-      setState(() {
-        _categories = categories;
-      });
-    } catch (e) {
-      // Handle error
-    }
-  }
-
-  Future<void> _fetchProducts({bool reset = false}) async {
-    if (_isLoading || _isLoadingMore) return;
-    if (reset) {
-      setState(() {
-        _isLoading = true;
-        _products = [];
-        _currentPage = 1;
-        _hasMore = true;
-      });
-    } else {
-      setState(() {
-        _isLoadingMore = true;
-      });
-    }
-    try {
-      final products = await ApiService.fetchPopularProducts(
-        _currentPage,
-        10,
-        categoryId: _selectedCategoryId,
-        search: _searchQuery,
-      );
-      setState(() {
-        if (reset) {
-          _products = products;
-        } else {
-          _products.addAll(products);
-        }
-        _hasMore = products.length == 10;
-        if (_hasMore) _currentPage++;
-      });
-    } catch (e) {
-      // Handle error
-    } finally {
-      setState(() {
-        _isLoading = false;
-        _isLoadingMore = false;
-      });
-    }
-  }
-
-  void _onCategorySelected(Category category) {
+  Future<void> loadData() async {
+    final best = await ApiService.fetchPopularProducts(1, 10);
+    final more = await ApiService.fetchMoreToExploreProducts(1, 10);
     setState(() {
-      _selectedCategoryId = category.id;
+      _bestSelling = best;
+      _moreToExplore = more;
+      isLoading = false;
     });
-    _fetchProducts(reset: true);
-  }
-
-  void _onSearchChanged(String value) {
-    _searchQuery = value;
-    _fetchProducts(reset: true);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mobile Shop'),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          custom_widgets.SearchBar(
-            controller: _searchController,
-            onChanged: _onSearchChanged,
+      backgroundColor: Colors.white,
+      bottomNavigationBar: BottomNavigationBar(
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        showUnselectedLabels: true,
+        currentIndex: 0,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: "Cart",
           ),
-          if (_categories.isNotEmpty)
-            custom_widgets.CategoryCarousel(
-              categories: _categories,
-              selectedCategoryId: _selectedCategoryId,
-              onCategorySelected: _onCategorySelected,
-            ),
-          Expanded(
-            child: _isLoading && _products.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : ProductGrid(
-                    products: _products,
-                    scrollController: _scrollController,
-                    isLoadingMore: _isLoadingMore,
-                  ),
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
         ],
       ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 🔍 Search bar with camera
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            decoration: InputDecoration(
+                              hintText: 'Search',
+                              prefixIcon: const Icon(Icons.search),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(24),
+                                borderSide: BorderSide.none,
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey.shade200,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          padding: const EdgeInsets.all(12),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // 🎠 Category Carousel
+                    const Text(
+                      "Categories",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    const CategoryCarousel(), // Asigură-te că are icon + text într-un cerc
+                    const SizedBox(height: 24),
+
+                    // 🔥 Best Selling
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text(
+                          "Best Selling",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text("See all", style: TextStyle(color: Colors.black)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 260,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _bestSelling.length,
+                        itemBuilder: (context, index) {
+                          return ProductCard(product: _bestSelling[index]);
+                        },
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // ✨ More to Explore
+                    const Text(
+                      "More to Explore",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.7,
+                      children: _moreToExplore
+                          .map((product) => ProductCard(product: product))
+                          .toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
     );
   }
 }

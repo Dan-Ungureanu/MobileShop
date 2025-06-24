@@ -13,9 +13,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Mobile Shop',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        primarySwatch: Colors.green,
+        scaffoldBackgroundColor: Colors.white,
       ),
       home: const HomeScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
