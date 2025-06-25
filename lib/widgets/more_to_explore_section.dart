@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/product.dart';
 
 class MoreToExploreSection extends StatelessWidget {
@@ -17,10 +18,13 @@ class MoreToExploreSection extends StatelessWidget {
       itemBuilder: (context, index) {
         final product = products[index];
         return ListTile(
-          leading: const Icon(Icons.shopping_bag),
-          title: Text(product.name),
-          subtitle: Text(product.details),
-          trailing: Text('\$${product.price.toStringAsFixed(2)}'),
+          leading: Icon(Icons.shopping_bag, size: 24.sp),
+          title: Text(product.name, style: TextStyle(fontSize: 16.sp)),
+          subtitle: Text(product.details, style: TextStyle(fontSize: 14.sp)),
+          trailing: Text(
+            '\$${product.price.toStringAsFixed(2)}',
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+          ),
         );
       },
     );

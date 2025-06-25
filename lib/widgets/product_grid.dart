@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/product.dart';
 
@@ -18,14 +19,11 @@ class ProductGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.builder(
       controller: scrollController,
-      padding: EdgeInsets.symmetric(
-        horizontal: MediaQuery.of(context).size.width * 0.04,
-        vertical: MediaQuery.of(context).size.height * 0.01,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 220,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
+        maxCrossAxisExtent: 220.w,
+        mainAxisSpacing: 16.h,
+        crossAxisSpacing: 16.w,
         childAspectRatio: 0.7,
       ),
       itemCount: products.length + (isLoadingMore ? 1 : 0),
@@ -37,31 +35,28 @@ class ProductGrid extends StatelessWidget {
         return Card(
           elevation: 2,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(16.r),
                   ),
                   child: CachedNetworkImage(
-                    // imageUrl: product.imageUrl,
                     fit: BoxFit.cover,
                     placeholder: (context, url) =>
                         const Center(child: CircularProgressIndicator()),
                     errorWidget: (context, url, error) =>
-                        const Icon(Icons.error),
+                        Icon(Icons.error, size: 24.sp),
                     imageUrl: 'https://via.placeholder.com/150',
                   ),
                 ),
               ),
               Padding(
-                padding: EdgeInsets.all(
-                  MediaQuery.of(context).size.width * 0.02,
-                ),
+                padding: EdgeInsets.all(12.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -69,18 +64,18 @@ class ProductGrid extends StatelessWidget {
                       product.name,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: MediaQuery.of(context).size.width * 0.045,
+                        fontSize: 16.sp,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
-                      '4${product.price.toString()}',
+                      '\$${product.price.toString()}',
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontWeight: FontWeight.bold,
-                        fontSize: MediaQuery.of(context).size.width * 0.04,
+                        fontSize: 14.sp,
                       ),
                     ),
                   ],

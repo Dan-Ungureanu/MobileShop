@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class Category {
-  final String name;
-  final String iconUrl;
-
-  Category({required this.name, required this.iconUrl});
-
-  factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(name: json['name'], iconUrl: json['icon']);
-  }
-}
+import 'package:shop/models/category.dart';
+import 'package:shop/services/api_service.dart';
 
 class CategoryCarousel extends StatefulWidget {
   const CategoryCarousel({super.key});
@@ -32,7 +25,7 @@ class _CategoryCarouselState extends State<CategoryCarousel> {
 
   Future<void> fetchCategories() async {
     final response = await http.get(
-      Uri.parse('http://mobile-shop-api.hiring.devebs.net/categories'),
+      Uri.parse('${ApiService.baseUrl}/categories'),
     );
 
     if (response.statusCode == 200) {
@@ -55,18 +48,18 @@ class _CategoryCarouselState extends State<CategoryCarousel> {
     }
 
     return SizedBox(
-      height: 100,
+      height: 100.h,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (_, __) => SizedBox(width: 12.w),
         itemBuilder: (context, index) {
           final category = categories[index];
           return Column(
             children: [
               Container(
-                width: 56,
-                height: 56,
+                width: 56.w,
+                height: 56.h,
                 decoration: BoxDecoration(
                   color: Colors.grey.shade200,
                   shape: BoxShape.circle,
@@ -76,18 +69,18 @@ class _CategoryCarouselState extends State<CategoryCarousel> {
                     category.iconUrl,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) =>
-                        const Icon(Icons.image_not_supported),
+                        Icon(Icons.image_not_supported, size: 24.sp),
                   ),
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4.h),
               SizedBox(
-                width: 80,
+                width: 80.w,
                 child: Text(
                   category.name,
                   textAlign: TextAlign.center,
                   maxLines: 2,
-                  style: const TextStyle(fontSize: 11),
+                  style: TextStyle(fontSize: 11.sp),
                 ),
               ),
             ],

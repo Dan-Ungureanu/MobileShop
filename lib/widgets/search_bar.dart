@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SearchBar extends StatelessWidget {
   final TextEditingController controller;
@@ -13,14 +14,14 @@ class SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(16.0.w),
       child: TextField(
         controller: controller,
         onChanged: onChanged,
         decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.search),
+          prefixIcon: Icon(Icons.search, size: 24.sp),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
             borderSide: BorderSide.none,
           ),
           filled: true,

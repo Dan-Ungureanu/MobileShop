@@ -6,7 +6,8 @@ class Product {
   final String colour;
   final double price;
   final int soldCount;
-  final ProductCategory? category; // Fă-l opțional dacă poate lipsi
+  final bool isFavourite;
+  final ProductCategory? category;
 
   Product({
     required this.id,
@@ -16,12 +17,24 @@ class Product {
     required this.colour,
     required this.price,
     required this.soldCount,
+    this.isFavourite = false,
     this.category,
   });
+  Product copyWith({bool? isFavourite}) {
+    return Product(
+      id: id,
+      name: name,
+      details: 'details',
+      size: 'size',
+      colour: 'colour',
+      price: 0,
+      soldCount: 0,
+      isFavourite: isFavourite ?? this.isFavourite,
+      category: ProductCategory(id: 0, name: 'name', icon: 'icon'),
+    );
+  }
 
   factory Product.fromJson(Map<String, dynamic> json) {
-    print('Creating product from: $json');
-
     final categoryJson = json['category'];
     ProductCategory? category;
     if (categoryJson != null && categoryJson is Map<String, dynamic>) {
@@ -39,6 +52,19 @@ class Product {
       category: category,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'details': details,
+      'size': size,
+      'colour': colour,
+      'price': price,
+      'sold_count': soldCount,
+      'category': category?.toJson(),
+    };
+  }
 }
 
 class ProductCategory {
@@ -54,5 +80,9 @@ class ProductCategory {
       name: json['name'] ?? '',
       icon: json['icon'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'id': id, 'name': name, 'icon': icon};
   }
 }

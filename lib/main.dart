@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'screens/home_screen.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await GetStorage.init();
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -10,14 +15,21 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mobile Shop',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        scaffoldBackgroundColor: Colors.white,
-      ),
-      home: const HomeScreen(),
-      debugShowCheckedModeBanner: false,
+    return ScreenUtilInit(
+      designSize: const Size(414, 896),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return GetMaterialApp(
+          title: 'Mobile Shop',
+          theme: ThemeData(
+            primarySwatch: Colors.green,
+            scaffoldBackgroundColor: Colors.white,
+          ),
+          home: HomeScreen(),
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }

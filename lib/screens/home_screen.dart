@@ -1,36 +1,17 @@
 import 'package:flutter/material.dart';
-import '../models/product.dart';
-import '../services/api_service.dart';
+import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:shop/screens/favorite_product_screen.dart';
+import '../controllers/home_controller.dart';
 import '../widgets/category_carousel.dart';
 import '../widgets/product_card.dart';
+import '../screens/product_detail_screen.dart';
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
+class HomeScreen extends StatelessWidget {
+  HomeScreen({super.key});
 
-class _HomeScreenState extends State<HomeScreen> {
-  List<Product> _bestSelling = [];
-  List<Product> _moreToExplore = [];
-
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    loadData();
-  }
-
-  Future<void> loadData() async {
-    final best = await ApiService.fetchPopularProducts(1, 10);
-    final more = await ApiService.fetchMoreToExploreProducts(1, 10);
-    setState(() {
-      _bestSelling = best;
-      _moreToExplore = more;
-      isLoading = false;
-    });
-  }
+  final HomeController controller = Get.put(HomeController());
 
   @override
   Widget build(BuildContext context) {
@@ -41,129 +22,184 @@ class _HomeScreenState extends State<HomeScreen> {
         unselectedItemColor: Colors.grey,
         showUnselectedLabels: true,
         currentIndex: 0,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: "Explore"),
+        items: [
           BottomNavigationBarItem(
+            icon: IconButton(
+              onPressed: () {
+                Get.to(() => FavouriteProductsScreen());
+              },
+              icon: (const Icon(Icons.explore)),
+            ),
+            label: "Explore",
+          ),
+          const BottomNavigationBarItem(
             icon: Icon(Icons.shopping_cart),
             label: "Cart",
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: "Profile"),
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: "Profile",
+          ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 🔍 Search bar with camera
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            decoration: InputDecoration(
-                              hintText: 'Search',
-                              prefixIcon: const Icon(Icons.search),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
+      body: Obx(
+        () => controller.isLoading.value
+            ? const Center(child: CircularProgressIndicator())
+            : SafeArea(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                onChanged: controller.onSearchChanged,
+                                decoration: InputDecoration(
+                                  prefixIcon: const Icon(Icons.search),
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 16.w,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(24.r),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  filled: true,
+                                  fillColor: Colors.grey.shade200,
+                                ),
                               ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(24),
-                                borderSide: BorderSide.none,
-                              ),
-                              filled: true,
-                              fillColor: Colors.grey.shade200,
                             ),
-                          ),
+                            SizedBox(width: 10.w),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              padding: EdgeInsets.all(12.w),
+                              child: const Icon(
+                                Icons.camera_alt,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 10),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          padding: const EdgeInsets.all(12),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    // 🎠 Category Carousel
-                    const Text(
-                      "Categories",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
                       ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    const CategoryCarousel(), // Asigură-te că are icon + text într-un cerc
-                    const SizedBox(height: 24),
-
-                    // 🔥 Best Selling
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text(
-                          "Best Selling",
+                      SliverToBoxAdapter(child: SizedBox(height: 20.h)),
+                      SliverToBoxAdapter(
+                        child: Text(
+                          "Categories",
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        Text("See all", style: TextStyle(color: Colors.black)),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 260,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _bestSelling.length,
-                        itemBuilder: (context, index) {
-                          return ProductCard(product: _bestSelling[index]);
-                        },
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
                       ),
-                    ),
+                      SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+                      SliverToBoxAdapter(child: const CategoryCarousel()),
+                      SliverToBoxAdapter(child: SizedBox(height: 10.h)),
 
-                    const SizedBox(height: 24),
-
-                    // ✨ More to Explore
-                    const Text(
-                      "More to Explore",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                      SliverAppBar(
+                        backgroundColor: Colors.white,
+                        pinned: false,
+                        floating: false,
+                        snap: false,
+                        expandedHeight: 260.h,
+                        flexibleSpace: FlexibleSpaceBar(
+                          collapseMode: CollapseMode.parallax,
+                          background: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 0.w,
+                                  vertical: 8.h,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'Best Sell',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {},
+                                      child: const Text(
+                                        'See all',
+                                        style: TextStyle(fontSize: 14),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              CarouselSlider(
+                                options: CarouselOptions(
+                                  height: 200.h,
+                                  enlargeCenterPage: true,
+                                  enableInfiniteScroll: true,
+                                  autoPlay: true,
+                                  viewportFraction: 0.8,
+                                ),
+                                items: controller.bestSelling.map((product) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Get.to(
+                                        () => ProductDetailScreen(
+                                          product: product,
+                                        ),
+                                      );
+                                    },
+                                    child: ProductCard(product: product),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 12),
-                    GridView.count(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 0.7,
-                      children: _moreToExplore
-                          .map((product) => ProductCard(product: product))
-                          .toList(),
-                    ),
-                  ],
+
+                      SliverToBoxAdapter(child: SizedBox(height: 10.h)),
+                      SliverToBoxAdapter(
+                        child: Text(
+                          "More to Explore",
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      SliverToBoxAdapter(child: SizedBox(height: 12.h)),
+                      SliverGrid(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final product = controller.filteredProducts[index];
+                          return GestureDetector(
+                            onTap: () {
+                              Get.to(
+                                () => ProductDetailScreen(product: product),
+                              );
+                            },
+                            child: ProductCard(product: product),
+                          );
+                        }, childCount: controller.filteredProducts.length),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12.w,
+                          mainAxisSpacing: 12.h,
+                          childAspectRatio: 0.7,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
+      ),
     );
   }
 }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import '../models/product.dart';
+import '../controllers/home_controller.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -8,78 +11,85 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final HomeController controller = Get.find();
+
     return Container(
-      width: 160, // fix pentru scroll orizontal
+      width: 160.w,
       decoration: BoxDecoration(
         color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       child: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: EdgeInsets.all(12.0.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Imagine produs
                 Expanded(
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                       image: DecorationImage(
                         image: NetworkImage(product.category!.icon),
-                      ), // sau NetworkImage
-                      // fit: BoxFit.cover,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
-                // ),
-                const SizedBox(height: 8),
-
-                // Nume produs
+                SizedBox(height: 8.h),
                 Text(
                   product.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp,
+                  ),
                 ),
-
-                // Descriere produs
                 Text(
                   product.details,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.grey),
+                  style: TextStyle(color: Colors.grey, fontSize: 12.sp),
                 ),
-
-                const SizedBox(height: 4),
-
-                // Preț
+                SizedBox(height: 4.h),
                 Text(
                   '\$${product.price.toStringAsFixed(0)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.green,
                     fontWeight: FontWeight.bold,
+                    fontSize: 16.sp,
                   ),
                 ),
               ],
             ),
           ),
-
-          // Icon stea
           Positioned(
-            top: 8,
-            right: 8,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(blurRadius: 2, color: Colors.black12)],
-              ),
-              padding: const EdgeInsets.all(6),
-              child: const Icon(Icons.star_border, size: 18),
-            ),
+            top: 8.h,
+            right: 8.w,
+            child: Obx(() {
+              final isFav = controller.isFavourite(product.id);
+              return IconButton(
+                icon: Icon(
+                  isFav ? Icons.star : Icons.star_border,
+                  color: isFav ? Colors.red[700] : Colors.grey,
+                ),
+                onPressed: () {
+                  controller.toggleFavourite(product.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        isFav
+                            ? 'Removed from favourites'
+                            : 'Added to favourites',
+                      ),
+                    ),
+                  );
+                },
+              );
+            }),
           ),
         ],
       ),
